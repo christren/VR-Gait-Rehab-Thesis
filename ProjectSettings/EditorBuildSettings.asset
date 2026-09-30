@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Walkway_Gait_Demo_W8.unity
-    guid: ef1bd974bb179f94e88c0e9748f1682f
+    path: Assets/Scenes/HandTracking.unity
+    guid: 7eb49456f832c8546ac1fc82db3da717
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

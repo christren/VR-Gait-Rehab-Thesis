@@ -340,6 +340,28 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
+--- !u!114 &-6108582398217299717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3aced3429e5911458f4da2dac9d0f29, type: 3}
+  m_Name: MetaHandTrackingAim Android
+  m_EditorClassIdentifier: Unity.XR.Hands::UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim
+  m_enabled: 0
+  nameUi: Meta Hand Tracking Aim
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metahandtrackingaim
+  openxrExtensionStrings: XR_FB_hand_tracking_aim
+  company: Unity
+  priority: 0
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
 --- !u!114 &-5960105153257713271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -593,26 +615,26 @@ MonoBehaviour:
   m_Name: Standalone
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: -3861335225803081747}
+  - {fileID: 492905571846405894}
   - {fileID: 3894669538657539700}
-  - {fileID: -3266772678778354302}
+  - {fileID: 6205522692928914527}
   - {fileID: 1992701172345901988}
   - {fileID: 5959254620609736722}
-  - {fileID: -1226259417855743067}
+  - {fileID: 9171597200255041467}
   - {fileID: -4033102980257336070}
-  - {fileID: 895779551758073838}
-  - {fileID: -5375256336227834745}
+  - {fileID: 1544542521083768375}
+  - {fileID: -3856082999244303794}
   - {fileID: -3551046182752282333}
   - {fileID: -4482898173858099669}
   - {fileID: -8514950620525017654}
-  - {fileID: -7625418639395385806}
+  - {fileID: 1225228638187035076}
   - {fileID: 8490497250735579171}
   - {fileID: -1985617451569185269}
   - {fileID: 2366117824125986978}
   - {fileID: -3299180674772457876}
   - {fileID: -3074468735841512587}
-  - {fileID: 3349245886402894364}
-  - {fileID: -612087322958483887}
+  - {fileID: 4042390635546372402}
+  - {fileID: 6431097911316189702}
   - {fileID: 8344036509388370160}
   - {fileID: 2888907701032048761}
   - {fileID: 7168894604246519989}
@@ -631,6 +653,7 @@ MonoBehaviour:
   - {fileID: 3434986274603239297}
   - {fileID: 457981152929332046}
   - {fileID: 6445502038524452484}
+  - {fileID: -2981074499365302270}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -1106,6 +1129,29 @@ MonoBehaviour:
   customRuntimeLoaderName: 
   m_ApiLayers:
     m_Collection: []
+--- !u!114 &-2981074499365302270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e314dfef9af0904e80129bcc0a79361, type: 3}
+  m_Name: HandTracking Standalone
+  m_EditorClassIdentifier: Unity.XR.Hands::UnityEngine.XR.Hands.OpenXR.HandTracking
+  m_enabled: 0
+  nameUi: Hand Tracking Subsystem
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.handtrackingsubsystem
+  openxrExtensionStrings: XR_EXT_hand_tracking
+  company: Unity
+  priority: -100
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
+  m_AutoStartSubsystem: 1
 --- !u!114 &-2673873304598855776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1715,6 +1761,28 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
+--- !u!114 &1225228638187035076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3aced3429e5911458f4da2dac9d0f29, type: 3}
+  m_Name: MetaHandTrackingAim Standalone
+  m_EditorClassIdentifier: Unity.XR.Hands::UnityEngine.XR.Hands.OpenXR.MetaHandTrackingAim
+  m_enabled: 0
+  nameUi: Meta Hand Tracking Aim
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.metahandtrackingaim
+  openxrExtensionStrings: XR_FB_hand_tracking_aim
+  company: Unity
+  priority: 0
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
 --- !u!114 &1480876514153273520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1962,28 +2030,28 @@ MonoBehaviour:
   m_Name: Android
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: -8462090492575015876}
+  - {fileID: 5528280019980744073}
   - {fileID: -3033661831313727982}
-  - {fileID: 3323524523193553068}
+  - {fileID: 8564346870418533924}
   - {fileID: -4593870374915083284}
-  - {fileID: 5769856671049711131}
+  - {fileID: 8352670368684228226}
   - {fileID: -3462353026263456465}
-  - {fileID: -4631182217779638451}
-  - {fileID: -1848659081816959554}
+  - {fileID: -2673873304598855776}
+  - {fileID: -923921455911895602}
   - {fileID: 3841820196888581527}
-  - {fileID: -6685155029812789034}
+  - {fileID: -3290631169550491870}
   - {fileID: 2528162855706540560}
-  - {fileID: 4259223023514839828}
-  - {fileID: -4156567504120639229}
-  - {fileID: -1603615264517781282}
-  - {fileID: 668650193456158645}
-  - {fileID: -1485001287992495501}
-  - {fileID: -7105192132391252786}
-  - {fileID: 5894872854404840708}
-  - {fileID: -958848666631017963}
+  - {fileID: 6092007382048042581}
+  - {fileID: -6108582398217299717}
+  - {fileID: 8065316330122303786}
+  - {fileID: 4637395657358896075}
+  - {fileID: 7645908518414374121}
+  - {fileID: -3763866909160302279}
+  - {fileID: 7700629065922260611}
+  - {fileID: 4553978526773759786}
   - {fileID: 2153313397980707433}
   - {fileID: 5343753810248919794}
-  - {fileID: -5040944391372225535}
+  - {fileID: 9191686046444955867}
   - {fileID: -7281054033566317067}
   - {fileID: 5633464204135998856}
   - {fileID: 2107443783211360321}
@@ -2011,7 +2079,8 @@ MonoBehaviour:
   - {fileID: -3229116407828637241}
   - {fileID: 7416649415239608793}
   - {fileID: 6672344709389522849}
-  - {fileID: -9069546065117564067}
+  - {fileID: 3197387734195082786}
+  - {fileID: 8694062601469882889}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -2910,6 +2979,29 @@ MonoBehaviour:
   required: 0
   customRuntimeLoaderName: 
   m_UseRightHandedNDC: 0
+--- !u!114 &8694062601469882889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e314dfef9af0904e80129bcc0a79361, type: 3}
+  m_Name: HandTracking Android
+  m_EditorClassIdentifier: Unity.XR.Hands::UnityEngine.XR.Hands.OpenXR.HandTracking
+  m_enabled: 0
+  nameUi: Hand Tracking Subsystem
+  version: 0.0.1
+  featureIdInternal: com.unity.openxr.feature.input.handtrackingsubsystem
+  openxrExtensionStrings: XR_EXT_hand_tracking
+  company: Unity
+  priority: -100
+  targetOpenXRApiVersion: 
+  required: 0
+  customRuntimeLoaderName: 
+  m_AutoStartSubsystem: 1
 --- !u!114 &9171597200255041467
 MonoBehaviour:
   m_ObjectHideFlags: 0
