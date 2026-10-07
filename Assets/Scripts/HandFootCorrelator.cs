@@ -1,32 +1,15 @@
+using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.XR.Hands;
-using UnityEngine.XR.Management;
 
-/// <summary>
-/// Continuously maps hand displacement (from a calibrated rest pose) onto a
-/// foot IK target's position, per axis, with independent scale and invert
-/// controls. Right hand drives right foot target, left hand drives left foot
-/// target (matching sides), unless swapped in the Inspector.
-///
-/// This replaces discrete "step trigger" locomotion (ArmSwingGaitDetector /
-/// GaitLocomotion) with smooth, proportional, continuous limb correlation:
-/// hand moves 10cm forward -> foot target moves 10cm forward (after scale).
-///
-/// Requires: com.unity.xr.hands package + OpenXR Hand Tracking Subsystem
-/// enabled (see Project Settings > XR Plug-in Management > OpenXR).
-/// Requires: com.unity.animation.rigging Two Bone IK Constraint targets
-/// assigned in leftFootTarget / rightFootTarget.
-/// </summary>
 public class HandFootCorrelator : MonoBehaviour
 {
     [System.Serializable]
     public class AxisMapping
     {
-        [Tooltip("Multiplier applied to hand displacement before applying to the foot target on this axis.")]
         public float scale = 1f;
-        [Tooltip("Flip the direction of movement on this axis.")]
         public bool invert = false;
-
         public float Apply(float delta)
         {
             float d = delta * scale;
@@ -34,7 +17,8 @@ public class HandFootCorrelator : MonoBehaviour
         }
     }
 
-    [Header("Foot IK Targets (Two Bone IK Constraint targets)")]
+    [Header("References")]
+    public Transform head;
     public Transform leftFootTarget;
     public Transform rightFootTarget;
 
@@ -44,11 +28,9 @@ public class HandFootCorrelator : MonoBehaviour
     public AxisMapping zAxis = new AxisMapping();
 
     [Header("Side Assignment")]
-    [Tooltip("If true, left hand drives the right foot target and vice versa.")]
     public bool crossMapSides = false;
 
     [Header("Reachable Range Safety")]
-    [Tooltip("Foot target cannot move further than this from its rest position on any axis, to keep the IK solver stable.")]
     public float maxReachMeters = 0.6f;
 
     private XRHandSubsystem handSubsystem;
@@ -58,7 +40,9 @@ public class HandFootCorrelator : MonoBehaviour
 
     void OnEnable()
     {
-        var subsystems = new System.Collections.Generic.List<XRHandSubsystem>();
+        if (head == null && Camera.main != null) head = Camera.main.transform;
+
+        var subsystems = new List<XRHandSubsystem>();
         SubsystemManager.GetSubsystems(subsystems);
         if (subsystems.Count > 0)
         {
@@ -67,8 +51,7 @@ public class HandFootCorrelator : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("HandFootCorrelator: No XRHandSubsystem found. " +
-                "Enable OpenXR Hand Tracking Subsystem in Project Settings.");
+            UnityEngine.Debug.LogWarning("HandFootCorrelator: No XRHandSubsystem found.");
         }
 
         if (leftFootTarget != null) leftFootRestPos = leftFootTarget.localPosition;
@@ -82,9 +65,11 @@ public class HandFootCorrelator : MonoBehaviour
     }
 
     void OnHandsUpdated(XRHandSubsystem subsystem,
-        XRHandSubsystem.UpdateSuccessFlags updateSuccessFlags,
-        XRHandSubsystem.UpdateType updateType)
+        XRHandSubsystem.UpdateSuccessFlags flags,
+        XRHandSubsystem.UpdateType type)
     {
+        if (head == null) return;
+
         var leftHand = subsystem.leftHand;
         var rightHand = subsystem.rightHand;
 
@@ -93,6 +78,9 @@ public class HandFootCorrelator : MonoBehaviour
 
         bool gotLeft = leftHand.isTracked && TryGetPalmPosition(leftHand, out leftPos);
         bool gotRight = rightHand.isTracked && TryGetPalmPosition(rightHand, out rightPos);
+
+        if (gotLeft) leftPos = ToHeadFrame(leftPos);
+        if (gotRight) rightPos = ToHeadFrame(rightPos);
 
         if (!calibrated && gotLeft && gotRight)
         {
@@ -113,48 +101,48 @@ public class HandFootCorrelator : MonoBehaviour
             crossMapSides ? leftFootRestPos : rightFootRestPos);
     }
 
-    bool TryGetPalmPosition(XRHand hand, out Vector3 worldPos)
+    bool TryGetPalmPosition(XRHand hand, out Vector3 pos)
     {
         var palm = hand.GetJoint(XRHandJointID.Palm);
         if (palm.TryGetPose(out Pose pose))
         {
-            worldPos = pose.position;
+            pos = pose.position;
             return true;
         }
-        worldPos = default;
+        pos = default;
         return false;
     }
 
-    void ApplyHandToFoot(Vector3 currentHandPos, Vector3 restHandPos,
+    Vector3 ToHeadFrame(Vector3 trackingPos)
+    {
+        Vector3 world = transform.TransformPoint(trackingPos);
+        Vector3 flat = world - head.position;
+        flat.y = 0f;
+        Quaternion yaw = Quaternion.Euler(0f, head.eulerAngles.y, 0f);
+        Vector3 rel = Quaternion.Inverse(yaw) * flat;
+        rel.y = world.y;
+        return rel;
+    }
+
+    void ApplyHandToFoot(Vector3 handPos, Vector3 restHandPos,
         Transform footTarget, Vector3 footRestPos)
     {
         if (footTarget == null) return;
 
-        // Displacement in world space, converted into this object's local
-        // axes so X/Y/Z mapping is relative to the player's own orientation,
-        // not world space (important if the player rig can rotate).
-        Vector3 worldDelta = currentHandPos - restHandPos;
-        Vector3 localDelta = transform.InverseTransformDirection(worldDelta);
-
+        Vector3 delta = handPos - restHandPos;
         Vector3 mapped = new Vector3(
-            xAxis.Apply(localDelta.x),
-            yAxis.Apply(localDelta.y),
-            zAxis.Apply(localDelta.z)
-        );
+            xAxis.Apply(delta.x),
+            yAxis.Apply(delta.y),
+            zAxis.Apply(delta.z));
 
         mapped = Vector3.ClampMagnitude(mapped, maxReachMeters);
-
         footTarget.localPosition = footRestPos + mapped;
     }
 
-    /// <summary>
-    /// Re-baseline both hand rest positions and foot rest positions.
-    /// Call when the patient settles into a comfortable seated/starting pose.
-    /// </summary>
     public void Recalibrate()
     {
         calibrated = false;
-        if (leftFootTarget != null) leftFootRestPos = leftFootTarget.localPosition;
-        if (rightFootTarget != null) rightFootRestPos = rightFootTarget.localPosition;
+        if (leftFootTarget != null) leftFootTarget.localPosition = leftFootRestPos;
+        if (rightFootTarget != null) rightFootTarget.localPosition = rightFootRestPos;
     }
 }

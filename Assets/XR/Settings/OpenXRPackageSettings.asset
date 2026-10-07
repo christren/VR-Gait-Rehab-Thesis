@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec058e82c4fd831488e0fe81bb41d440, type: 3}
   m_Name: ViveHandInteraction Android
   m_EditorClassIdentifier: VIVE.OpenXR::VIVE.OpenXR.Hand.ViveHandInteraction
-  m_enabled: 0
+  m_enabled: 1
   nameUi: VIVE XR Hand Interaction
   version: 1.0.0
   featureIdInternal: vive.openxr.feature.hand.interaction
@@ -615,15 +615,15 @@ MonoBehaviour:
   m_Name: Standalone
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: 492905571846405894}
+  - {fileID: -3861335225803081747}
   - {fileID: 3894669538657539700}
-  - {fileID: 6205522692928914527}
+  - {fileID: -3266772678778354302}
   - {fileID: 1992701172345901988}
   - {fileID: 5959254620609736722}
-  - {fileID: 9171597200255041467}
+  - {fileID: -1226259417855743067}
   - {fileID: -4033102980257336070}
-  - {fileID: 1544542521083768375}
-  - {fileID: -3856082999244303794}
+  - {fileID: 895779551758073838}
+  - {fileID: -5375256336227834745}
   - {fileID: -3551046182752282333}
   - {fileID: -4482898173858099669}
   - {fileID: -8514950620525017654}
@@ -633,8 +633,8 @@ MonoBehaviour:
   - {fileID: 2366117824125986978}
   - {fileID: -3299180674772457876}
   - {fileID: -3074468735841512587}
-  - {fileID: 4042390635546372402}
-  - {fileID: 6431097911316189702}
+  - {fileID: 3349245886402894364}
+  - {fileID: -612087322958483887}
   - {fileID: 8344036509388370160}
   - {fileID: 2888907701032048761}
   - {fileID: 7168894604246519989}
@@ -976,7 +976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a24be4b5ebfe5f4d8ed1de9b25cb7aa, type: 3}
   m_Name: HandCommonPosesInteraction Android
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.Features.Interactions.HandCommonPosesInteraction
-  m_enabled: 0
+  m_enabled: 1
   nameUi: Hand Interaction Poses
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.handinteractionposes
@@ -2469,7 +2469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9396fe2350b43e04db60471cc512653e, type: 3}
   m_Name: ViveInteractions Android
   m_EditorClassIdentifier: VIVE.OpenXR::VIVE.OpenXR.Interaction.ViveInteractions
-  m_enabled: 0
+  m_enabled: 1
   nameUi: VIVE XR - Interaction Group
   version: 2.5.0
   featureIdInternal: vive.openxr.feature.interactions
@@ -2479,7 +2479,7 @@ MonoBehaviour:
   targetOpenXRApiVersion: 
   required: 0
   customRuntimeLoaderName: 
-  m_ViveHandInteraction: 0
+  m_ViveHandInteraction: 1
   m_ViveWristTracker: 0
   m_ViveXRTracker: 0
   m_KHRHandInteraction: 0
@@ -2991,7 +2991,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e314dfef9af0904e80129bcc0a79361, type: 3}
   m_Name: HandTracking Android
   m_EditorClassIdentifier: Unity.XR.Hands::UnityEngine.XR.Hands.OpenXR.HandTracking
-  m_enabled: 0
+  m_enabled: 1
   nameUi: Hand Tracking Subsystem
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.handtrackingsubsystem
