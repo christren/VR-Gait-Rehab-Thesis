@@ -9,6 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/HandTracking.unity
     guid: 7eb49456f832c8546ac1fc82db3da717
   m_configObjects:
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 876518925d8dfc346887084ed0910d49, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 8e52a0a3f6b14b4469a3c104331823ad, type: 2}
