@@ -2893,17 +2893,16 @@ MonoBehaviour:
   head: {fileID: 1062354153}
   navigationFrame: {fileID: 1792461637}
   turningEnabled: 1
-  triggerAngle: 15
-  glanceHoldSeconds: 0.3
-  neutralAngle: 7
-  neutralHoldSeconds: 0.15
-  maxTurnPerGesture: 30
+  deadZoneMeters: 0.03
+  fullLeanMeters: 0.08
   maxTurnSpeed: 20
-  arrivalResponsiveness: 4
-  pauseWalkingDuringTurn: 1
-  headYaw: 0
-  remainingTurn: 0
-  waitingForHeadReturn: 0
+  leanSmoothTime: 0.06
+  invertTurn: 0
+  pauseWalkingDuringTurn: 0
+  lateralLeanMeters: 0
+  filteredLeanMeters: 0
+  currentTurnSpeed: 0
+  waitingForNeutral: 0
 --- !u!114 &872086942
 MonoBehaviour:
   m_ObjectHideFlags: 0

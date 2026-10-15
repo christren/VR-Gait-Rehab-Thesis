@@ -384,8 +384,12 @@ public class FootLocomotion : MonoBehaviour
 
         localMove.y = 0f;
 
-        if (forwardOnly && localMove.z < 0f)
-            localMove.z = 0f;
+        // !!! 
+        if (forwardOnly)
+        {
+            localMove.x = 0f;
+            localMove.z = Mathf.Max(0f, localMove.z);
+        }
 
         float limit = Mathf.Max(0f, maxMovePerFrame);
 
