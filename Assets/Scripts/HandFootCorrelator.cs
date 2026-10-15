@@ -1,3 +1,4 @@
+/* Version prior to 14.10.26 (backup)
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -68,6 +69,9 @@ public class HandFootCorrelator : MonoBehaviour
         XRHandSubsystem.UpdateSuccessFlags flags,
         XRHandSubsystem.UpdateType type)
     {
+        
+        if (type != XRHandSubsystem.UpdateType.Dynamic) return;
+
         if (head == null) return;
 
         var leftHand = subsystem.leftHand;
@@ -144,5 +148,240 @@ public class HandFootCorrelator : MonoBehaviour
         calibrated = false;
         if (leftFootTarget != null) leftFootTarget.localPosition = leftFootRestPos;
         if (rightFootTarget != null) rightFootTarget.localPosition = rightFootRestPos;
+    }
+}
+*/
+
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR.Hands;
+
+public class HandFootCorrelator : MonoBehaviour
+{
+    [System.Serializable]
+    public class AxisMapping
+    {
+        public float scale = 1f;
+        public bool invert;
+
+        public float Apply(float delta)
+        {
+            return delta * scale * (invert ? -1f : 1f);
+        }
+    }
+
+    [Header("References")]
+    public Transform head;
+    public Transform trackingSpace;
+    public Transform navigationFrame;
+    public Transform leftFootTarget;
+    public Transform rightFootTarget;
+
+    [Header("Per-Axis Mapping")]
+    public AxisMapping xAxis = new AxisMapping();
+    public AxisMapping yAxis = new AxisMapping();
+    public AxisMapping zAxis = new AxisMapping();
+
+    [Header("Side Assignment")]
+    public bool crossMapSides;
+
+    [Header("Reachable Range Safety")]
+    public float maxReachMeters = 0.6f;
+
+    [Header("Tracking")]
+    public float trackingTimeout = 0.15f;
+
+    private readonly List<XRHandSubsystem> subsystems =
+        new List<XRHandSubsystem>();
+
+    private XRHandSubsystem handSubsystem;
+    private Vector3 leftHandRestPos, rightHandRestPos;
+    private Vector3 leftFootRestPos, rightFootRestPos;
+    private Quaternion inputFrame = Quaternion.identity;
+
+    private bool calibrated;
+    private bool bothTracked;
+    private float lastUpdateTime = -100f;
+
+    public bool InputReady =>
+        isActiveAndEnabled &&
+        calibrated &&
+        bothTracked &&
+        Time.unscaledTime - lastUpdateTime <= trackingTimeout;
+
+    void Awake()
+    {
+        if (leftFootTarget != null)
+            leftFootRestPos = leftFootTarget.localPosition;
+
+        if (rightFootTarget != null)
+            rightFootRestPos = rightFootTarget.localPosition;
+    }
+
+    void OnEnable()
+    {
+        calibrated = false;
+        bothTracked = false;
+    }
+
+    void Update()
+    {
+        if (bothTracked &&
+            Time.unscaledTime - lastUpdateTime > trackingTimeout)
+        {
+            Recalibrate();
+        }
+
+        if (handSubsystem != null && handSubsystem.running)
+            return;
+
+        Unsubscribe();
+
+        SubsystemManager.GetSubsystems(subsystems);
+
+        foreach (XRHandSubsystem candidate in subsystems)
+        {
+            if (!candidate.running)
+                continue;
+
+            handSubsystem = candidate;
+            handSubsystem.updatedHands += OnHandsUpdated;
+            break;
+        }
+    }
+
+    void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    void Unsubscribe()
+    {
+        if (handSubsystem != null)
+            handSubsystem.updatedHands -= OnHandsUpdated;
+
+        handSubsystem = null;
+        calibrated = false;
+        bothTracked = false;
+    }
+
+    void OnHandsUpdated(
+        XRHandSubsystem subsystem,
+        XRHandSubsystem.UpdateSuccessFlags flags,
+        XRHandSubsystem.UpdateType type)
+    {
+        if (type != XRHandSubsystem.UpdateType.Dynamic)
+            return;
+
+        if (trackingSpace == null ||
+            navigationFrame == null ||
+            leftFootTarget == null ||
+            rightFootTarget == null)
+            return;
+
+        bool gotLeft = TryPalm(
+            subsystem.leftHand, out Vector3 left);
+
+        bool gotRight = TryPalm(
+            subsystem.rightHand, out Vector3 right);
+
+        bothTracked = gotLeft && gotRight;
+        lastUpdateTime = Time.unscaledTime;
+
+        if (!bothTracked)
+        {
+            calibrated = false;
+            ResetTargets();
+            return;
+        }
+
+        if (!calibrated)
+        {
+            Vector3 forward =
+                trackingSpace.InverseTransformDirection(
+                    navigationFrame.forward);
+
+            forward.y = 0f;
+
+            if (forward.sqrMagnitude < 0.001f)
+                return;
+
+            inputFrame = Quaternion.LookRotation(
+                forward.normalized, Vector3.up);
+
+            leftHandRestPos = left;
+            rightHandRestPos = right;
+
+            ResetTargets();
+            calibrated = true;
+            return;
+        }
+
+        Vector3 deltaLeft = Quaternion.Inverse(inputFrame) *
+            (left - leftHandRestPos);
+
+        Vector3 deltaRight = Quaternion.Inverse(inputFrame) *
+            (right - rightHandRestPos);
+
+        Apply(
+            leftFootTarget,
+            leftFootRestPos,
+            crossMapSides ? deltaRight : deltaLeft);
+
+        Apply(
+            rightFootTarget,
+            rightFootRestPos,
+            crossMapSides ? deltaLeft : deltaRight);
+    }
+
+    bool TryPalm(XRHand hand, out Vector3 position)
+    {
+        position = default;
+
+        if (!hand.isTracked ||
+            !hand.GetJoint(XRHandJointID.Palm)
+                .TryGetPose(out Pose pose))
+            return false;
+
+        position = pose.position;
+        return true;
+    }
+
+    void Apply(
+        Transform target,
+        Vector3 restPosition,
+        Vector3 handDelta)
+    {
+        Vector3 mapped = new Vector3(
+            xAxis.Apply(handDelta.x),
+            yAxis.Apply(handDelta.y),
+            zAxis.Apply(handDelta.z));
+
+        mapped = Vector3.ClampMagnitude(mapped, maxReachMeters);
+
+        Vector3 worldDelta =
+            navigationFrame.TransformVector(mapped);
+
+        Vector3 localDelta = target.parent != null
+            ? target.parent.InverseTransformVector(worldDelta)
+            : worldDelta;
+
+        target.localPosition = restPosition + localDelta;
+    }
+
+    void ResetTargets()
+    {
+        if (leftFootTarget != null)
+            leftFootTarget.localPosition = leftFootRestPos;
+
+        if (rightFootTarget != null)
+            rightFootTarget.localPosition = rightFootRestPos;
+    }
+
+    public void Recalibrate()
+    {
+        calibrated = false;
+        bothTracked = false;
+        ResetTargets();
     }
 }

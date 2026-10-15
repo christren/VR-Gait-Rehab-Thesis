@@ -93,10 +93,21 @@ public class PinchRecalibrate : MonoBehaviour
 
     void DoRecalibrate()
     {
-        if (correlator != null) correlator.Recalibrate();
-        if (locomotion != null) locomotion.Recalibrate();
+        GlanceTurn turn = FindFirstObjectByType<GlanceTurn>();
+
+        if (turn != null)
+            turn.RecalibrateNeutral();
+
+        if (correlator != null)
+            correlator.Recalibrate();
+
+        if (locomotion != null)
+            locomotion.Recalibrate();
+
         Play(doneClip);
-        UnityEngine.Debug.Log("PinchRecalibrate: recalibrated.");
+
+        UnityEngine.Debug.Log(
+            "PinchRecalibrate: hands, feet and glance neutral reset.");
     }
 
     void Play(AudioClip clip)

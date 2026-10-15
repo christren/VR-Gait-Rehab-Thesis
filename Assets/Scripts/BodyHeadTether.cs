@@ -1,75 +1,4 @@
-/*
-using UnityEngine;
-
-public class BodyHeadTether : MonoBehaviour
-{
-    [Header("References")]
-    [SerializeField] private Transform head;
-
-    [Header("Position")]
-    [SerializeField] private float forwardOffset = 0.25f;
-    [SerializeField] private float followSpeed = 14f;
-
-    [Header("Rotation")]
-    [SerializeField] private float yawFollowSpeed = 10f;
-
-    private float calibratedLocalY;
-
-    private void Awake()
-    {
-        calibratedLocalY = transform.localPosition.y;
-    }
-
-    private void LateUpdate()
-    {
-        if (head == null || transform.parent == null)
-            return;
-
-        Vector3 localHeadPosition =
-            transform.parent.InverseTransformPoint(head.position);
-
-        Vector3 targetLocalPosition = new Vector3(
-            localHeadPosition.x,
-            calibratedLocalY,
-            localHeadPosition.z
-        );
-
-        Vector3 flatHeadForward =
-            Vector3.ProjectOnPlane(head.forward, Vector3.up);
-
-        if (flatHeadForward.sqrMagnitude > 0.001f)
-        {
-            flatHeadForward.Normalize();
-
-            Vector3 localForward =
-                transform.parent.InverseTransformDirection(flatHeadForward);
-
-            targetLocalPosition += localForward * forwardOffset;
-
-            Quaternion targetRotation =
-                Quaternion.LookRotation(flatHeadForward, Vector3.up);
-
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                yawFollowSpeed * Time.deltaTime
-            );
-        }
-
-        transform.localPosition = Vector3.Lerp(
-            transform.localPosition,
-            targetLocalPosition,
-            followSpeed * Time.deltaTime
-        );
-    }
-
-    public void RecalibrateHeight()
-    {
-        calibratedLocalY = transform.localPosition.y;
-    }
-}
-*/
-
+/* Version prior to 14.10.26 (backup)
 using UnityEngine;
 
 public class BodyHeadTether : MonoBehaviour
@@ -135,6 +64,68 @@ public class BodyHeadTether : MonoBehaviour
         Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, kYaw);
         transform.localPosition = Vector3.Lerp(transform.localPosition, targetLocal, kPos);
+    }
+
+    public void RecalibrateHeight()
+    {
+        calibratedLocalY = transform.localPosition.y;
+    }
+}
+*/
+
+using UnityEngine;
+
+[DefaultExecutionOrder(150)]
+public class BodyHeadTether : MonoBehaviour
+{
+    [Header("References")]
+    [SerializeField] private Transform head;
+    [SerializeField] private Transform navigationFrame;
+
+    [Header("Position")]
+    [SerializeField] private float forwardOffset = -0.2f;
+    [SerializeField] private float sideOffset;
+    [SerializeField] private float followSpeed = 14f;
+
+    private float calibratedLocalY;
+
+    void Awake()
+    {
+        calibratedLocalY = transform.localPosition.y;
+    }
+
+    void LateUpdate()
+    {
+        if (head == null ||
+            navigationFrame == null ||
+            transform.parent == null)
+            return;
+
+        Vector3 forward = Vector3.ProjectOnPlane(
+            navigationFrame.forward, Vector3.up).normalized;
+
+        if (forward.sqrMagnitude < 0.001f)
+            return;
+
+        Vector3 right = Vector3.Cross(Vector3.up, forward);
+
+        Vector3 goalWorld = head.position +
+            forward * forwardOffset +
+            right * sideOffset;
+
+        Vector3 goalLocal =
+            transform.parent.InverseTransformPoint(goalWorld);
+
+        goalLocal.y = calibratedLocalY;
+
+        float blend =
+            1f - Mathf.Exp(-followSpeed * Time.deltaTime);
+
+        transform.localPosition = Vector3.Lerp(
+            transform.localPosition, goalLocal, blend);
+
+        transform.rotation =
+            Quaternion.LookRotation(forward, Vector3.up);
     }
 
     public void RecalibrateHeight()

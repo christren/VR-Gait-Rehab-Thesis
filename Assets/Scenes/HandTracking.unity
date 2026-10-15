@@ -433,7 +433,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1991872486467531464, guid: c8146e7694b9541089b8dbaa8a7d59d9, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2007092666467966922, guid: c8146e7694b9541089b8dbaa8a7d59d9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -473,6 +473,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2007092666467966922, guid: c8146e7694b9541089b8dbaa8a7d59d9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5997505650109826162, guid: c8146e7694b9541089b8dbaa8a7d59d9, type: 3}
+      propertyPath: m_DebugDrawJoints
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7708523126598220080, guid: c8146e7694b9541089b8dbaa8a7d59d9, type: 3}
@@ -622,7 +626,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5895826684305351068, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6480925242510836759, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_Enabled
@@ -634,7 +638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9173983156334026967, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2576,6 +2580,7 @@ MonoBehaviour:
   invertDirection: 0
   forwardOnly: 1
   maxMovePerFrame: 0.1
+  moveSmoothTime: 0.03
   leftGrounded: 1
   rightGrounded: 1
 --- !u!114 &872086935
