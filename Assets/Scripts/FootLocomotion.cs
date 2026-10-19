@@ -213,6 +213,30 @@ public class FootLocomotion : MonoBehaviour
     private bool leftStepArmed, rightStepArmed;
     private bool inputWasReady;
 
+    public bool MovementEnabled
+    {
+        get => movementEnabled;
+        set
+        {
+            movementEnabled = value;
+
+            if (!value)
+                ResetMotion();
+        }
+    }
+
+    public bool ForwardOnly
+    {
+        get => forwardOnly;
+        set => forwardOnly = value;
+    }
+
+    public bool InvertDirection
+    {
+        get => invertDirection;
+        set => invertDirection = value;
+    }
+
     void Start()
     {
         if (xrOrigin == null)
@@ -228,6 +252,7 @@ public class FootLocomotion : MonoBehaviour
 
     void ResetMotion()
     {
+        smoothedLocalVelocity = Vector3.zero;
         smoothedLocalVelocity = Vector3.zero;
         leftStepArmed = false;
         rightStepArmed = false;
