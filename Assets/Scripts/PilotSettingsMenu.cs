@@ -222,6 +222,16 @@ public class PilotSettingsMenu : MonoBehaviour
             keyboardCalibration.enabled = false;
 
         menuRoot.SetActive(true);
+        Canvas.ForceUpdateCanvases();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            (RectTransform)content);
+
+        ScrollRect scrollRect =
+            content.GetComponentInParent<ScrollRect>();
+
+        if (scrollRect != null)
+            scrollRect.verticalNormalizedPosition = 1f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
 
