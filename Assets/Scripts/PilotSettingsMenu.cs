@@ -5,6 +5,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Application = UnityEngine.Application;
+using Debug = UnityEngine.Debug;
+using Text = UnityEngine.UI.Text;
+
 [DefaultExecutionOrder(-200)]
 public class PilotSettingsMenu : MonoBehaviour
 {
@@ -37,6 +41,11 @@ public class PilotSettingsMenu : MonoBehaviour
 
     [Header("Startup")]
     public float preparationSeconds = 3f;
+
+    private const float HandGainBMultiplier = 1.5f;
+
+    private Vector3 baselineHandScales;
+    private bool handGainB;
 
     private class SettingRow
     {
@@ -72,6 +81,14 @@ public class PilotSettingsMenu : MonoBehaviour
             return;
         }
 
+        // Capture the original Inspector values once per app launch.
+        baselineHandScales = new Vector3(
+            correlator.xAxis.scale,
+            correlator.yAxis.scale,
+            correlator.zAxis.scale);
+
+        handGainB = false;
+
         BuildRows();
 
         applyButton.onClick.AddListener(ApplyAndStart);
@@ -88,6 +105,11 @@ public class PilotSettingsMenu : MonoBehaviour
     void BuildRows()
     {
         checkboxTemplate.gameObject.SetActive(false);
+
+        AddRow(
+            "Hand gain B (1.5x)",
+            () => handGainB,
+            value => SetHandGainB(value));
 
         AddRow(
             "Movement enabled",
@@ -148,6 +170,33 @@ public class PilotSettingsMenu : MonoBehaviour
         AddComponentRow("Keyboard calibration", keyboardCalibration);
     }
 
+    void SetHandGainB(bool enabled)
+    {
+        handGainB = enabled;
+
+        float multiplier = enabled
+            ? HandGainBMultiplier
+            : 1f;
+
+        // Always calculate from the original values.
+        // Reapplying B therefore never compounds the multiplier.
+        correlator.xAxis.scale =
+            baselineHandScales.x * multiplier;
+
+        correlator.yAxis.scale =
+            baselineHandScales.y * multiplier;
+
+        correlator.zAxis.scale =
+            baselineHandScales.z * multiplier;
+
+        Debug.Log(
+            $"Hand gain condition: {(enabled ? "B" : "A")}. " +
+            $"Multiplier={multiplier}. " +
+            $"Scales: X={correlator.xAxis.scale}, " +
+            $"Y={correlator.yAxis.scale}, " +
+            $"Z={correlator.zAxis.scale}");
+    }
+
     void AddComponentRow(string label, Behaviour component)
     {
         if (component == null)
@@ -200,17 +249,19 @@ public class PilotSettingsMenu : MonoBehaviour
     [ContextMenu("Show Menu")]
     public void ShowMenu()
     {
-        if (!Application.isPlaying || applying || rows.Count == 0)
+        if (!Application.isPlaying ||
+            applying ||
+            rows.Count == 0)
             return;
 
         if (menuOpen)
             return;
 
-        // Read the intended configuration before pausing scripts.
+        // Read intended settings before temporarily pausing gameplay.
         foreach (SettingRow row in rows)
             row.toggle.SetIsOnWithoutNotify(row.read());
 
-        // Pause gameplay, not the XR tracking/UI systems.
+        // Pause gameplay, not XR tracking or controller UI input.
         locomotion.enabled = false;
         turning.enabled = false;
         correlator.enabled = false;
@@ -222,6 +273,7 @@ public class PilotSettingsMenu : MonoBehaviour
             keyboardCalibration.enabled = false;
 
         menuRoot.SetActive(true);
+
         Canvas.ForceUpdateCanvases();
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(
@@ -232,6 +284,7 @@ public class PilotSettingsMenu : MonoBehaviour
 
         if (scrollRect != null)
             scrollRect.verticalNormalizedPosition = 1f;
+
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
 
@@ -247,7 +300,9 @@ public class PilotSettingsMenu : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!menuOpen || menuPlaced || !turning.HeadTracked)
+        if (!menuOpen ||
+            menuPlaced ||
+            !turning.HeadTracked)
             return;
 
         Vector3 forward =
@@ -310,8 +365,7 @@ public class PilotSettingsMenu : MonoBehaviour
         for (int i = 0; i < rows.Count; i++)
             rows[i].write(selectedValues[i]);
 
-        // These methods can be called even if an advanced
-        // checkbox intentionally leaves a component disabled.
+        // Preserve the existing calibration sequence.
         turning.RecalibrateNeutral();
         correlator.Recalibrate();
         locomotion.Recalibrate();
@@ -327,11 +381,16 @@ public class PilotSettingsMenu : MonoBehaviour
         Debug.Log(
             "Pilot settings applied " +
             DateTime.UtcNow.ToString("o") + "\n" +
-            string.Join("; ", values));
+            string.Join("; ", values) + "\n" +
+            $"Hand condition={(handGainB ? "B" : "A")}; " +
+            $"X scale={correlator.xAxis.scale}; " +
+            $"Y scale={correlator.yAxis.scale}; " +
+            $"Z scale={correlator.zAxis.scale}");
 
         SetHandPokes(false);
 
         menuRoot.SetActive(false);
+
         menuOpen = false;
         applying = false;
     }
