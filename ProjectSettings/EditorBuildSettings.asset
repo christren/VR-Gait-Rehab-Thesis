@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/NewHeadTurning_AudibleSteps_GUI_W5.unity
-    guid: c9b1a712142e34342b98440bedc530f3
+    path: Assets/Scenes/GUI_implement.unity
+    guid: d771f3e57af7f934eb866ecb9b104bfe
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 876518925d8dfc346887084ed0910d49, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}

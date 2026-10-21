@@ -687,7 +687,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Confirm and Start
+  m_text: Apply and Start
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -842,6 +842,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1319746308, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1680501587, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -904,6 +908,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1748222016861356527, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2449787133337329437, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2766569358201078490, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -4665,6 +4673,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1241082055}
   m_CullTransparentMesh: 1
+--- !u!1 &1252321415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1252321416}
+  - component: {fileID: 1252321417}
+  m_Layer: 0
+  m_Name: PilotSettingsMenu
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1252321416
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252321415}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1876512818}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1252321417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252321415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f46cfaf67ca5a8245ad600e8a5d4fb15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PilotSettingsMenu
+  menuRoot: {fileID: 1269434977}
+  canvasGroup: {fileID: 1269434979}
+  content: {fileID: 1561936937}
+  checkboxTemplate: {fileID: 1585430595}
+  applyButton: {fileID: 1418508702}
+  statusText: {fileID: 140605496}
+  head: {fileID: 1062354153}
+  menuDistance: 0.6
+  menuHeightOffset: -0.08
+  locomotion: {fileID: 872086929}
+  correlator: {fileID: 872086928}
+  turning: {fileID: 872086941}
+  bodyTether: {fileID: 1286813374}
+  legIK: {fileID: 1286813376}
+  pinchCalibration: {fileID: 872086942}
+  keyboardCalibration: {fileID: 872086935}
+  handPokeRoots: []
+  preparationSeconds: 3
 --- !u!1 &1269434977
 GameObject:
   m_ObjectHideFlags: 0
@@ -5905,6 +5975,7 @@ Transform:
   m_Children:
   - {fileID: 1269434978}
   - {fileID: 1136956021}
+  - {fileID: 1252321416}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1916997046 stripped
