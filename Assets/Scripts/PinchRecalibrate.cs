@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.Hands;
 
 public class PinchRecalibrate : MonoBehaviour
@@ -9,94 +9,179 @@ public class PinchRecalibrate : MonoBehaviour
     [SerializeField] private float holdSeconds = 2f;
     [SerializeField] private float cooldownSeconds = 2f;
 
+    [Tooltip("Total continuous pinch time before reloading the scene.")]
+    [SerializeField] private float resetHoldSeconds = 15f;
+
     [Header("Pinch detection")]
-    [Tooltip("Thumb tip to index tip distance (metres) that counts as pinched.")]
     [SerializeField] private float pinchDistance = 0.025f;
 
     [Header("Feedback (optional)")]
     [SerializeField] private AudioClip startClip;
     [SerializeField] private AudioClip doneClip;
 
-    [Header("Debug (read-only)")]
+    [Header("Debug - read only")]
     [SerializeField] private float holdProgress01;
+    [SerializeField] private float resetProgress01;
     [SerializeField] private bool leftPinched;
     [SerializeField] private bool rightPinched;
 
     private HandFootCorrelator correlator;
     private FootLocomotion locomotion;
+    private GlanceTurn turning;
     private XRHandSubsystem handSubsystem;
+
+    private readonly List<XRHandSubsystem> subsystems =
+        new List<XRHandSubsystem>();
+
     private float holdTimer;
     private float cooldownEnd;
+
     private bool startClipPlayed;
+    private bool calibratedThisHold;
+    private bool waitForRelease;
+    private bool resetRequested;
+
+    void OnEnable()
+    {
+        ClearHold();
+        waitForRelease = true;
+        resetRequested = false;
+    }
 
     void Start()
     {
         correlator = FindFirstObjectByType<HandFootCorrelator>();
         locomotion = FindFirstObjectByType<FootLocomotion>();
+        turning = FindFirstObjectByType<GlanceTurn>();
+    }
+
+    void OnApplicationPause(bool paused)
+    {
+        if (!paused)
+            return;
+
+        ClearHold();
+        waitForRelease = true;
     }
 
     void Update()
     {
-        if (handSubsystem == null)
+        if (resetRequested)
+            return;
+
+        FindHandSubsystem();
+
+        bool running =
+            handSubsystem != null && handSubsystem.running;
+
+        leftPinched =
+            running && IsPinched(handSubsystem.leftHand);
+
+        rightPinched =
+            running && IsPinched(handSubsystem.rightHand);
+
+        // Prevent an already-held pinch from triggering
+        // immediately after enabling this component.
+        if (waitForRelease)
         {
-            var subsystems = new List<XRHandSubsystem>();
-            SubsystemManager.GetSubsystems(subsystems);
-            if (subsystems.Count == 0) return;
-            handSubsystem = subsystems[0];
+            if (!leftPinched && !rightPinched)
+                waitForRelease = false;
+
+            return;
         }
 
-        leftPinched = IsPinched(handSubsystem.leftHand);
-        rightPinched = IsPinched(handSubsystem.rightHand);
+        bool bothPinched = leftPinched && rightPinched;
 
-        bool both = leftPinched && rightPinched && Time.time >= cooldownEnd;
-
-        if (both)
+        if (!bothPinched)
         {
-            if (!startClipPlayed)
+            if (calibratedThisHold)
             {
-                Play(startClip);
-                startClipPlayed = true;
+                cooldownEnd =
+                    Time.unscaledTime + cooldownSeconds;
             }
 
-            holdTimer += Time.unscaledDeltaTime;
-            holdProgress01 = Mathf.Clamp01(holdTimer / holdSeconds);
-
-            if (holdTimer >= holdSeconds)
-            {
-                DoRecalibrate();
-                holdTimer = 0f;
-                holdProgress01 = 0f;
-                startClipPlayed = false;
-                cooldownEnd = Time.time + cooldownSeconds;
-            }
+            ClearHold();
+            return;
         }
-        else
+
+        if (Time.unscaledTime < cooldownEnd)
+            return;
+
+        if (!startClipPlayed)
         {
-            holdTimer = 0f;
-            holdProgress01 = 0f;
-            startClipPlayed = false;
+            Play(startClip);
+            startClipPlayed = true;
+        }
+
+        holdTimer += Time.unscaledDeltaTime;
+
+        float calibrationTime = Mathf.Max(0.1f, holdSeconds);
+
+        float resetTime = Mathf.Max(
+            resetHoldSeconds, calibrationTime + 1f);
+
+        holdProgress01 =
+            Mathf.Clamp01(holdTimer / calibrationTime);
+
+        resetProgress01 =
+            Mathf.Clamp01(holdTimer / resetTime);
+
+        if (!calibratedThisHold &&
+            holdTimer >= calibrationTime)
+        {
+            DoRecalibrate();
+            calibratedThisHold = true;
+        }
+
+        // Do not reset holdTimer after the normal calibration.
+        // The same continuous hold can reach the reset duration.
+        if (holdTimer >= resetTime)
+            ReturnToStart();
+    }
+
+    void FindHandSubsystem()
+    {
+        if (handSubsystem != null && handSubsystem.running)
+            return;
+
+        handSubsystem = null;
+
+        SubsystemManager.GetSubsystems(subsystems);
+
+        foreach (XRHandSubsystem candidate in subsystems)
+        {
+            if (!candidate.running)
+                continue;
+
+            handSubsystem = candidate;
+            break;
         }
     }
 
     bool IsPinched(XRHand hand)
     {
-        if (!hand.isTracked) return false;
+        if (!hand.isTracked)
+            return false;
 
-        var thumb = hand.GetJoint(XRHandJointID.ThumbTip);
-        var index = hand.GetJoint(XRHandJointID.IndexTip);
+        bool gotThumb =
+            hand.GetJoint(XRHandJointID.ThumbTip)
+                .TryGetPose(out Pose thumbPose);
 
-        if (thumb.TryGetPose(out Pose thumbPose) && index.TryGetPose(out Pose indexPose))
-            return Vector3.Distance(thumbPose.position, indexPose.position) < pinchDistance;
+        bool gotIndex =
+            hand.GetJoint(XRHandJointID.IndexTip)
+                .TryGetPose(out Pose indexPose);
 
-        return false;
+        return gotThumb &&
+            gotIndex &&
+            Vector3.Distance(
+                thumbPose.position,
+                indexPose.position) < pinchDistance;
     }
 
     void DoRecalibrate()
     {
-        GlanceTurn turn = FindFirstObjectByType<GlanceTurn>();
-
-        if (turn != null)
-            turn.RecalibrateNeutral();
+        if (turning != null)
+            turning.RecalibrateNeutral();
 
         if (correlator != null)
             correlator.Recalibrate();
@@ -107,12 +192,58 @@ public class PinchRecalibrate : MonoBehaviour
         Play(doneClip);
 
         UnityEngine.Debug.Log(
-            "PinchRecalibrate: hands, feet and glance neutral reset.");
+            "PinchRecalibrate: neutral positions reset.");
+    }
+
+    void ReturnToStart()
+    {
+        int sceneIndex =
+            SceneManager.GetActiveScene().buildIndex;
+
+        if (sceneIndex < 0)
+        {
+            UnityEngine.Debug.LogError(
+                "Return to start failed: add this scene " +
+                "to the Build Profiles scene list.");
+
+            ClearHold();
+            waitForRelease = true;
+            return;
+        }
+
+        resetRequested = true;
+
+        if (locomotion != null)
+            locomotion.enabled = false;
+
+        if (turning != null)
+            turning.enabled = false;
+
+        if (correlator != null)
+            correlator.enabled = false;
+
+        UnityEngine.Debug.Log(
+            "PinchRecalibrate: returning to start/menu.");
+
+        SceneManager.LoadSceneAsync(
+            sceneIndex, LoadSceneMode.Single);
+    }
+
+    void ClearHold()
+    {
+        holdTimer = 0f;
+        holdProgress01 = 0f;
+        resetProgress01 = 0f;
+        startClipPlayed = false;
+        calibratedThisHold = false;
     }
 
     void Play(AudioClip clip)
     {
         if (clip != null && Camera.main != null)
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position);
+        {
+            AudioSource.PlayClipAtPoint(
+                clip, Camera.main.transform.position);
+        }
     }
 }
